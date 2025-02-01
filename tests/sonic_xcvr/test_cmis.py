@@ -661,7 +661,9 @@ class TestCmis(object):
     @pytest.mark.parametrize("mock_response1, mock_response2, expected", [
         (True, '1', 0 ),
         (False, None, 0),
-        (False, '5', 5.0),
+        (False, '500', 5000.0),
+        (False, '1000', 10000.0),
+        (False, '5000', 5000.0),
         (False, '60000', 60000.0),
     ])
     def test_get_datapath_init_duration(self, mock_response1, mock_response2, expected):
@@ -1241,6 +1243,20 @@ class TestCmis(object):
         self.api.set_media_output_loopback.return_value = mock_response
         result = self.api.set_loopback_mode(input_param[0], input_param[1])
         assert result == expected
+
+    def test_is_transceiver_vdm_supported_no_vdm(self):
+        self.api.vdm = None
+        assert self.api.is_transceiver_vdm_supported() == False
+
+    def test_is_transceiver_vdm_supported_true(self):
+        self.api.vdm = MagicMock()
+        self.api.xcvr_eeprom.read = MagicMock(return_value=1)
+        assert self.api.is_transceiver_vdm_supported() == True
+
+    def test_is_transceiver_vdm_supported_false(self):
+        self.api.vdm = MagicMock()
+        self.api.xcvr_eeprom.read = MagicMock(return_value=0)
+        assert self.api.is_transceiver_vdm_supported() == False
 
     @pytest.mark.parametrize("mock_response, expected",[
         (
