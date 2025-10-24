@@ -19,6 +19,26 @@ class Sff8472Api(XcvrApi):
     def get_serial(self):
         return self.xcvr_eeprom.read(consts.VENDOR_SERIAL_NO_FIELD)
 
+    def get_vendor_info(self):
+        '''
+        This function returns both manufacturer and part number in one EEPROM read.
+        This is more efficient than calling get_manufacturer() and get_model() separately.
+
+        Returns:
+            tuple: (manufacturer, part_number) or (None, None) if read fails
+        '''
+        try:
+            vendor_info = self.xcvr_eeprom.read(consts.VENDOR_INFO_FIELD)
+            if vendor_info is None:
+                return None, None
+
+            manufacturer = vendor_info.get(consts.VENDOR_NAME_FIELD)
+            part_number = vendor_info.get(consts.VENDOR_PART_NO_FIELD)
+
+            return manufacturer, part_number
+        except Exception:
+            return None, None
+
     def get_transceiver_info(self):
         serial_id = self.xcvr_eeprom.read(consts.SERIAL_ID_FIELD)
         if serial_id is None:

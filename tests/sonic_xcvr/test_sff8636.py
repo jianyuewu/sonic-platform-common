@@ -59,6 +59,32 @@ class TestSff8636(object):
         self.api.set_lpmode(True)
         self.api.get_lpmode()
 
+    @pytest.mark.parametrize("mock_response, expected_manufacturer, expected_part_number", [
+        (
+            {consts.VENDOR_NAME_FIELD: "NVIDIA          ", consts.VENDOR_PART_NO_FIELD: "MMA1234-TEST    "},
+            "NVIDIA          ",
+            "MMA1234-TEST    "
+        ),
+        (
+            {consts.VENDOR_NAME_FIELD: "Mellanox", consts.VENDOR_PART_NO_FIELD: "MCX123456"},
+            "Mellanox",
+            "MCX123456"
+        ),
+    ])
+    def test_get_vendor_info(self, mock_response, expected_manufacturer, expected_part_number):
+        self.api.xcvr_eeprom.read = MagicMock()
+        self.api.xcvr_eeprom.read.return_value = mock_response
+        manufacturer, part_number = self.api.get_vendor_info()
+        assert manufacturer == expected_manufacturer
+        assert part_number == expected_part_number
+
+    def test_get_vendor_info_failure(self):
+        self.api.xcvr_eeprom.read = MagicMock()
+        self.api.xcvr_eeprom.read.return_value = None
+        manufacturer, part_number = self.api.get_vendor_info()
+        assert manufacturer is None
+        assert part_number is None
+
     @pytest.mark.parametrize("mock_response, expected", [
         (bytearray([0x0]), "Power Class 1 Module (1.5W max.)"),
         (bytearray([0x40]), "Power Class 2 Module (2.0W max.)"),

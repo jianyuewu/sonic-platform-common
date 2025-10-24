@@ -22,7 +22,7 @@ class TestSff8472(object):
 
     def test_api(self):
         """
-        Verify all api access valid fields    
+        Verify all api access valid fields
         """
         self.api.get_model()
         self.api.get_serial()
@@ -57,12 +57,38 @@ class TestSff8472(object):
         self.api.get_power_override_support()
         self.api.is_copper()
 
+    @pytest.mark.parametrize("mock_response, expected_manufacturer, expected_part_number", [
+        (
+            {consts.VENDOR_NAME_FIELD: "NVIDIA          ", consts.VENDOR_PART_NO_FIELD: "SFP-1G-T        "},
+            "NVIDIA          ",
+            "SFP-1G-T        "
+        ),
+        (
+            {consts.VENDOR_NAME_FIELD: "Mellanox", consts.VENDOR_PART_NO_FIELD: "SFP123456"},
+            "Mellanox",
+            "SFP123456"
+        ),
+    ])
+    def test_get_vendor_info(self, mock_response, expected_manufacturer, expected_part_number):
+        self.api.xcvr_eeprom.read = MagicMock()
+        self.api.xcvr_eeprom.read.return_value = mock_response
+        manufacturer, part_number = self.api.get_vendor_info()
+        assert manufacturer == expected_manufacturer
+        assert part_number == expected_part_number
+
+    def test_get_vendor_info_failure(self):
+        self.api.xcvr_eeprom.read = MagicMock()
+        self.api.xcvr_eeprom.read.return_value = None
+        manufacturer, part_number = self.api.get_vendor_info()
+        assert manufacturer is None
+        assert part_number is None
+
     def test_temp(self):
         temp_field = self.mem_map.get_field(consts.TEMPERATURE_FIELD)
         data = bytearray([0x80, 0x00])
         deps = {
            consts.INT_CAL_FIELD: True,
-           consts.EXT_CAL_FIELD: False, 
+           consts.EXT_CAL_FIELD: False,
            consts.T_SLOPE_FIELD: 1,
            consts.T_OFFSET_FIELD: 0,
         }
@@ -72,7 +98,7 @@ class TestSff8472(object):
         data = bytearray([0x0F, 0xFF])
         deps = {
            consts.INT_CAL_FIELD: False,
-           consts.EXT_CAL_FIELD: True, 
+           consts.EXT_CAL_FIELD: True,
            consts.T_SLOPE_FIELD: 2,
            consts.T_OFFSET_FIELD: 10,
         }
@@ -84,7 +110,7 @@ class TestSff8472(object):
         data = bytearray([0xFF, 0xFF])
         deps = {
            consts.INT_CAL_FIELD: True,
-           consts.EXT_CAL_FIELD: False, 
+           consts.EXT_CAL_FIELD: False,
            consts.T_SLOPE_FIELD: 1,
            consts.T_OFFSET_FIELD: 0,
         }
@@ -95,7 +121,7 @@ class TestSff8472(object):
         data = bytearray([0x7F, 0xFF])
         deps = {
            consts.INT_CAL_FIELD: False,
-           consts.EXT_CAL_FIELD: True, 
+           consts.EXT_CAL_FIELD: True,
            consts.V_SLOPE_FIELD: 2,
            consts.V_OFFSET_FIELD: 10,
         }
@@ -107,7 +133,7 @@ class TestSff8472(object):
         data = bytearray([0xFF, 0xFF])
         deps = {
            consts.INT_CAL_FIELD: True,
-           consts.EXT_CAL_FIELD: False, 
+           consts.EXT_CAL_FIELD: False,
            consts.TX_I_SLOPE_FIELD: 1,
            consts.TX_I_OFFSET_FIELD: 0,
         }
@@ -118,7 +144,7 @@ class TestSff8472(object):
         data = bytearray([0x7F, 0xFF])
         deps = {
            consts.INT_CAL_FIELD: False,
-           consts.EXT_CAL_FIELD: True, 
+           consts.EXT_CAL_FIELD: True,
            consts.TX_I_SLOPE_FIELD: 2,
            consts.TX_I_OFFSET_FIELD: 10,
         }
@@ -130,7 +156,7 @@ class TestSff8472(object):
         data = bytearray([0xFF, 0xFF])
         deps = {
            consts.INT_CAL_FIELD: True,
-           consts.EXT_CAL_FIELD: False, 
+           consts.EXT_CAL_FIELD: False,
            consts.TX_PWR_SLOPE_FIELD: 1,
            consts.TX_PWR_OFFSET_FIELD: 0,
         }
@@ -141,7 +167,7 @@ class TestSff8472(object):
         data = bytearray([0x7F, 0xFF])
         deps = {
            consts.INT_CAL_FIELD: False,
-           consts.EXT_CAL_FIELD: True, 
+           consts.EXT_CAL_FIELD: True,
            consts.TX_PWR_SLOPE_FIELD: 2,
            consts.TX_PWR_OFFSET_FIELD: 10,
         }
@@ -153,7 +179,7 @@ class TestSff8472(object):
         data = bytearray([0xFF, 0xFF])
         deps = {
            consts.INT_CAL_FIELD: True,
-           consts.EXT_CAL_FIELD: False, 
+           consts.EXT_CAL_FIELD: False,
            consts.RX_PWR_0_FIELD: 0,
            consts.RX_PWR_1_FIELD: 1,
            consts.RX_PWR_2_FIELD: 0,
@@ -166,7 +192,7 @@ class TestSff8472(object):
 
         deps = {
            consts.INT_CAL_FIELD: False,
-           consts.EXT_CAL_FIELD: True, 
+           consts.EXT_CAL_FIELD: True,
            consts.RX_PWR_0_FIELD: 10,
            consts.RX_PWR_1_FIELD: 2,
            consts.RX_PWR_2_FIELD: 0.1,

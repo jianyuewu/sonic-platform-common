@@ -112,6 +112,11 @@ class CmisFlatMemMap(XcvrMemMap):
             NumberRegField(consts.ACTIVE_FW_MINOR_REV, self.getaddr(0x0, 40), format="B", size=1),
         )
 
+        self.VENDOR_INFO = RegGroupField(consts.VENDOR_INFO_FIELD,
+            StringRegField(consts.VENDOR_NAME_FIELD, self.getaddr(0x0, 129), size=16),
+            StringRegField(consts.VENDOR_PART_NO_FIELD, self.getaddr(0x0, 148), size=16),
+        )
+
         self.PAGE0_MODULE_LEVEL_MONITORS = RegGroupField(consts.MODULE_MONITORS_PAGE0_FIELD,
             NumberRegField(consts.TEMPERATURE_FIELD, self.getaddr(0x0, 14), size=2, format=">h", scale=256.0),
             NumberRegField(consts.VOLTAGE_FIELD, self.getaddr(0x0, 16), size=2, format=">H", scale=10000.0),
@@ -179,7 +184,7 @@ class CmisMemMap(CmisFlatMemMap):
             RegGroupField(consts.APPLS_ADVT_FIELD_PAGE01,
                 *(NumberRegField("%s_%d" % (consts.MEDIA_LANE_ASSIGNMENT_OPTION, app), self.getaddr(0x1, 176 + (app - 1)),
                     format="B", size=1) for app in range(1, 16)),
-                
+
                 *(CodeRegField("%s_%d" % (consts.HOST_ELECTRICAL_INTERFACE, app), self.getaddr(0x1, 223 + 4 * (app - 9)),
                     self.codes.HOST_ELECTRICAL_INTERFACE) for app in range(9, 16)),
 
@@ -307,7 +312,7 @@ class CmisMemMap(CmisFlatMemMap):
             NumberRegField(consts.DATAPATH_DEINIT_FIELD, self.getaddr(0x10, 128), ro=False),
             NumberRegField(consts.TX_DISABLE_FIELD, self.getaddr(0x10, 130), ro=False),
             NumberRegField(consts.RX_DISABLE_FIELD, self.getaddr(0x10, 138), ro=False,
-                *(RegBitField("%s_%d" % (consts.RX_DISABLE_FIELD, channel), bitpos, ro=False) 
+                *(RegBitField("%s_%d" % (consts.RX_DISABLE_FIELD, channel), bitpos, ro=False)
                   for channel, bitpos in zip(range(1, 9), range(0, 8)))  # 8 channels
             )
         )

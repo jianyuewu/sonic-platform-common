@@ -83,6 +83,32 @@ class TestCmis(object):
         result = self.api.get_serial()
         assert result == expected
 
+    @pytest.mark.parametrize("mock_response, expected_manufacturer, expected_part_number", [
+        (
+            {consts.VENDOR_NAME_FIELD: "NVIDIA          ", consts.VENDOR_PART_NO_FIELD: "MMA1234-TEST    "},
+            "NVIDIA",
+            "MMA1234-TEST"
+        ),
+        (
+            {consts.VENDOR_NAME_FIELD: "Mellanox", consts.VENDOR_PART_NO_FIELD: "MCX123456"},
+            "Mellanox",
+            "MCX123456"
+        ),
+    ])
+    def test_get_vendor_info(self, mock_response, expected_manufacturer, expected_part_number):
+        self.api.xcvr_eeprom.read = MagicMock()
+        self.api.xcvr_eeprom.read.return_value = mock_response
+        manufacturer, part_number = self.api.get_vendor_info()
+        assert manufacturer == expected_manufacturer
+        assert part_number == expected_part_number
+
+    def test_get_vendor_info_failure(self):
+        self.api.xcvr_eeprom.read = MagicMock()
+        self.api.xcvr_eeprom.read.return_value = None
+        manufacturer, part_number = self.api.get_vendor_info()
+        assert manufacturer is None
+        assert part_number is None
+
     @pytest.mark.parametrize("mock_response, expected", [
         (
             'QSFP-DD Double Density 8X Pluggable Transceiver',
@@ -2661,7 +2687,7 @@ class TestCmis(object):
             'ConfigStatusLane5': 'ConfigSuccess',
             'ConfigStatusLane6': 'ConfigSuccess',
             'ConfigStatusLane7': 'ConfigSuccess',
-            'ConfigStatusLane8': 'ConfigSuccess' 
+            'ConfigStatusLane8': 'ConfigSuccess'
           } )
     ])
     def test_decommission_all_datapaths(self, datapath_state, config_state):
@@ -2803,7 +2829,7 @@ class TestCmis(object):
 
             result = self.api.get_error_description()
             assert result is 'OK'
-            
+
             self.api.get_config_datapath_hostlane_status.return_value = {
                 'ConfigStatusLane1': 'ConfigRejected',
                 'ConfigStatusLane2': 'ConfigRejected',
@@ -2816,7 +2842,7 @@ class TestCmis(object):
             }
             result = self.api.get_error_description()
             assert result is 'ConfigRejected'
-            
+
             self.api.get_datapath_state.return_value = {
                 'DP1State': 'DataPathDeactivated',
                 'DP2State': 'DataPathActivated',

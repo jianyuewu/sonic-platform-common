@@ -91,6 +91,11 @@ class Sff8472MemMap(XcvrMemMap):
             ),
         )
 
+        self.VENDOR_INFO = RegGroupField(consts.VENDOR_INFO_FIELD,
+            StringRegField(consts.VENDOR_NAME_FIELD, self.get_addr(0xA0, None, 20), size=16),
+            StringRegField(consts.VENDOR_PART_NO_FIELD, self.get_addr(0xA0, None, 40), size=16),
+        )
+
         self.STATUS_CTRL = NumberRegField(consts.STATUS_CTRL_FIELD, self.get_addr(0xA2, 0, 110),
             RegBitField(consts.TX_DISABLE_FIELD, 7),
             RegBitField(consts.TX_DISABLE_SELECT_FIELD, 6, ro=False),

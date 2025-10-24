@@ -30,7 +30,7 @@ class Sff8636MemMap(XcvrMemMap):
         self.SERIAL_ID = RegGroupField(consts.SERIAL_ID_FIELD,
             CodeRegField(consts.ID_FIELD, self.get_addr(0, 0), self.codes.XCVR_IDENTIFIERS),
             CodeRegField(consts.ID_ABBRV_FIELD, self.get_addr(0, 0), self.codes.XCVR_IDENTIFIER_ABBRV),
-            RegGroupField(consts.EXT_ID_FIELD, 
+            RegGroupField(consts.EXT_ID_FIELD,
                 CodeRegField(consts.POWER_CLASS_FIELD, self.get_addr(0, 129), self.codes.POWER_CLASSES,
                     RegBitField("%s_0" % consts.POWER_CLASS_FIELD, 0),
                     RegBitField("%s_1" % consts.POWER_CLASS_FIELD, 1),
@@ -49,7 +49,7 @@ class Sff8636MemMap(XcvrMemMap):
                 ),
             ),
             CodeRegField(consts.CONNECTOR_FIELD, self.get_addr(0, 130), self.codes.CONNECTORS),
-            RegGroupField(consts.SPEC_COMPLIANCE_FIELD, 
+            RegGroupField(consts.SPEC_COMPLIANCE_FIELD,
                 CodeRegField(consts.ETHERNET_10_40G_COMPLIANCE_FIELD, self.get_addr(0, 131), self.codes.ETHERNET_10_40G_COMPLIANCE),
                 CodeRegField(consts.SONET_COMPLIANCE_FIELD, self.get_addr(0, 132), self.codes.SONET_COMPLIANCE),
                 CodeRegField(consts.SAS_SATA_COMPLIANCE_FIELD, self.get_addr(0, 133), self.codes.SAS_SATA_COMPLIANCE),
@@ -90,6 +90,11 @@ class Sff8636MemMap(XcvrMemMap):
             ),
         )
 
+        self.VENDOR_INFO = RegGroupField(consts.VENDOR_INFO_FIELD,
+            StringRegField(consts.VENDOR_NAME_FIELD, self.get_addr(0, 148), size=16),
+            StringRegField(consts.VENDOR_PART_NO_FIELD, self.get_addr(0, 168), size=16),
+        )
+
         self.RX_LOS = NumberRegField(consts.RX_LOS_FIELD, self.get_addr(0, 3),
             *(RegBitField("Rx%dLOS" % channel, bitpos)
               for channel, bitpos in zip(range(1, 5), range(0, 4)))
@@ -122,7 +127,7 @@ class Sff8636MemMap(XcvrMemMap):
         )
 
         self.TEMP = NumberRegField(consts.TEMPERATURE_FIELD, self.get_addr(0, 22), size=2, format=">h", scale=256)
-        
+
         self.VOLTAGE = NumberRegField(consts.VOLTAGE_FIELD, self.get_addr(0, 26), size=2, format=">H", scale=10000)
 
         self.POWER_CTRL = NumberRegField(consts.POWER_CTRL_FIELD, self.get_addr(0, 93),
