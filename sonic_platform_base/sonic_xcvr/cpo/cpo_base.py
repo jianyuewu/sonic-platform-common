@@ -78,3 +78,15 @@ class CpoBase(device_base.DeviceBase):
     def remove_xcvr_api(self):
         self.oe.remove_api()
         self.elsfp.remove_api()
+
+    def get_error_description(self):
+        """
+        Retrieves the error descriptions of the CPO module
+
+        Returns:
+            String that represents the current error descriptions of vendor specific errors
+            In case there are multiple errors, they should be joined by '|',
+            like: "Bad EEPROM|Unsupported cable"
+        """
+        api = self.get_xcvr_api()
+        return api.get_error_description() if api is not None else None
